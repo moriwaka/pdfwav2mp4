@@ -36,7 +36,7 @@ shift && print_usage
 mkdir -p tmp
 
 if [ ! -e tmp/0000.png -o "$PDF_FILE" -nt tmp/0000.png ]; then
-  rm tmp/*.png
+  rm -f tmp/*.png
   gm convert -density $DENSITY -geometry $GEOMETRY +adjoin "$PDF_FILE" png:tmp/%04d.png
 fi
 
