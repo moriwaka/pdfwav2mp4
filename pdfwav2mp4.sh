@@ -36,7 +36,8 @@ shift && print_usage
 
 mkdir -p tmp
 
-if [ ! -e tmp/0000.png -o "$PDF_FILE" -nt tmp/0000.png ]; then
+png=(tmp/*1.png)
+if [ ! -e $png -o "$PDF_FILE" -nt $png ]; then
   rm -f tmp/*.png
   pdftocairo -png -r $DENSITY -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" tmp/tmp
 fi
