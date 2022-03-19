@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 DENSITY=600
-GEOMETRY=1920x1080
+GEOMETRYX=1920
+GEOMETRYY=1080
 FPS=30
 
 ffmpeg_loglevel=warning
@@ -37,7 +38,7 @@ mkdir -p tmp
 
 if [ ! -e tmp/0000.png -o "$PDF_FILE" -nt tmp/0000.png ]; then
   rm -f tmp/*.png
-  gm convert -density $DENSITY -geometry $GEOMETRY +adjoin "$PDF_FILE" png:tmp/%04d.png
+  pdftocairo -png -r $DENSITY -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" tmp/tmp
 fi
 
 pngs=(tmp/*png)
@@ -54,7 +55,7 @@ for i in ${!wavs[@]}; do
     mp4=${png%.png}.mp4
     if [ ! -e $mp4 -o "$wav" -nt $mp4 -o $png -nt $mp4 ]; then
       ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i $png -i "$wav" \
-      -acodec aac -vcodec libx264 -tune stillimage -pix_fmt yuv420p -shortest -r $FPS $mp4
+      -acodec aac -vcodec libx264 -pix_fmt yuv420p -shortest -r $FPS $mp4
       touch $mp4
     fi
 done
