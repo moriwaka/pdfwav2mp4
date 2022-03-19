@@ -11,6 +11,6 @@ will create 'My Presentation.mp4'
 Dependency:
 
 - ffmpeg
-- GraphicsMagick
+- poppler-utils
 
 This script was forked from https://github.com/automating-presentations/slide2mp4
