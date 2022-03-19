@@ -56,7 +56,7 @@ for i in ${!wavs[@]}; do
     mp4=${png%.png}.mp4
     if [ ! -e $mp4 -o "$wav" -nt $mp4 -o $png -nt $mp4 ]; then
       ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i $png -i "$wav" \
-      -acodec aac -vcodec libx264 -pix_fmt yuv420p -shortest -r $FPS $mp4
+      -acodec aac -vcodec libx264 -x264opts keyint=1 -pix_fmt yuv420p -shortest -r $FPS $mp4
       touch $mp4
     fi
 done
@@ -65,5 +65,5 @@ done
 rm -f tmp/list.txt 
 mp4s=(tmp/*mp4)
 for mp4 in ${mp4s[@]}; do echo "file ${mp4#tmp/}" >> tmp/list.txt; done
-ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i tmp/list.txt -c copy "${PDF_FILE%.pdf}.mp4"
+ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i tmp/list.txt -vcodec libx264 "${PDF_FILE%.pdf}.mp4"
 
