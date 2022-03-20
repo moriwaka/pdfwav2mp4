@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 #
 # Copyright (C) 2022 Kazuo Moriwaka
 # Copyright (C) 2021 Hirofumi Kojima
@@ -40,14 +40,13 @@ shift && print_usage
 BASENAME="$(basename "$PDF_FILE")"
 TMP_DIR=./tmp-${BASENAME%.pdf}
 mkdir -p "$TMP_DIR"
-
-firstpng=("$TMP_DIR"/*1.png)
-if [ ! -e "$firstpng" -o "$PDF_FILE" -nt "$firstpng" ]; then
-    rm -f "$TMP_DIR"/*.png
-    pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" "$TMP_DIR"/tmp
-fi
-
 cd "$TMP_DIR"
+
+firstpng=(*1.png)
+if [ ! -e "$firstpng" -o "$PDF_FILE" -nt "$firstpng" ]; then
+    rm -f *.png
+    pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" tmp
+fi
 
 pngs=(*png)
 wavs=("$WAV_DIR"/*wav)
