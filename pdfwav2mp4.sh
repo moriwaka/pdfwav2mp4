@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-DENSITY=600
 GEOMETRYX=1920
 GEOMETRYY=1080
 FPS=30
@@ -41,7 +40,7 @@ mkdir -p tmp
 png=(tmp/*1.png)
 if [ ! -e $png -o "$PDF_FILE" -nt $png ]; then
   rm -f tmp/*.png
-  pdftocairo -png -r $DENSITY -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" tmp/tmp
+  pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" tmp/tmp
 fi
 
 pngs=(tmp/*png)
