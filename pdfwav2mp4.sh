@@ -41,7 +41,7 @@ mkdir -p "$TMP_DIR"
 firstpng=("$TMP_DIR"/*1.png)
 if [ ! -e "$firstpng" -o "$PDF_FILE" -nt "$firstpng" ]; then
   rm -f "$TMP_DIR"/*.png
-  pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" "$TMP_DIR"/image
+  pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" "$TMP_DIR"/tmp
 fi
 
 pngs=("$TMP_DIR"/*png)
