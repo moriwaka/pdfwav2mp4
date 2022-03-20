@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # Copyright (C) 2022 Kazuo Moriwaka
 # Copyright (C) 2021 Hirofumi Kojima
@@ -30,13 +30,15 @@ print_usage ()
     exit
 }
 
-PDF_FILE=$1
+PDF_FILE=$(realpath "$1")
+OUT_FILE="${PDF_FILE%.pdf}.mp4"
 shift || print_usage
-WAV_DIR=$1
+WAV_DIR=$(realpath "$1")
 shift || print_usage
 shift && print_usage
 
-TMP_DIR="${PDF_FILE%.pdf}.tmp"
+BASENAME="$(basename "$PDF_FILE")"
+TMP_DIR=./tmp-${BASENAME%.pdf}
 mkdir -p "$TMP_DIR"
 
 firstpng=("$TMP_DIR"/*1.png)
@@ -45,7 +47,9 @@ if [ ! -e "$firstpng" -o "$PDF_FILE" -nt "$firstpng" ]; then
     pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" "$TMP_DIR"/tmp
 fi
 
-pngs=("$TMP_DIR"/*png)
+cd "$TMP_DIR"
+
+pngs=(*png)
 wavs=("$WAV_DIR"/*wav)
 
 if [ ${#pngs[@]} != ${#wavs[@]} ]; then
@@ -54,24 +58,29 @@ if [ ${#pngs[@]} != ${#wavs[@]} ]; then
 fi
 
 modified=0
+LIST=conv_list.txt
+rm -f "$LIST"
 for i in ${!wavs[@]}; do
     wav=${wavs[$i]} 
     png=${pngs[$i]}
     mp4=${png%.png}.mp4
     if [ ! -e "$mp4" -o "$wav" -nt "$mp4" -o "$png" -nt "$mp4" ]; then
-        ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i "$png" -i "$wav" \
-               -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval -pix_fmt yuv420p -shortest -r $FPS "$mp4"
+        printf "$png\x00$wav\x00$mp4\n" >> "$LIST"
         ((modified++))
     fi
 done
-if [ $modified == 0 ]; then
+if [ $modified == 0 -a -e "$OUT_FILE" ]; then
     echo "Info: no file is changed. Update pdf/wav OR rm -rf '$TMP_DIR'."
     exit
 fi
 
+parallel --colsep '\0' \
+         ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i "{1}" -i "{2}" \
+         -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval -pix_fmt yuv420p -shortest -r $FPS "{3}" \
+         :::: "$LIST"
 
-rm -f "$TMP_DIR"/list.txt 
-mp4s=("$TMP_DIR"/*mp4)
-for mp4 in ${mp4s[@]}; do echo "file ${mp4#$TMP_DIR/}" >> "$TMP_DIR"/list.txt; done
-ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i "$TMP_DIR"/list.txt -vcodec libx264 "${PDF_FILE%.pdf}.mp4"
+rm -f list.txt 
+mp4s=(*mp4)
+for mp4 in ${mp4s[@]}; do echo "file ${mp4}" >> list.txt; done
+ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i list.txt -vcodec libx264 "$OUT_FILE"
 
