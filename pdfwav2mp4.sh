@@ -51,6 +51,7 @@ if [ ${#pngs[@]} != ${#wavs[@]} ]; then
   exit
 fi
 
+modified=0
 for i in ${!wavs[@]}; do
     wav=${wavs[$i]} 
     png=${pngs[$i]}
@@ -58,9 +59,13 @@ for i in ${!wavs[@]}; do
     if [ ! -e $mp4 -o "$wav" -nt $mp4 -o $png -nt $mp4 ]; then
       ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i $png -i "$wav" \
       -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval -pix_fmt yuv420p -shortest -r $FPS $mp4
-      touch $mp4
+      ((modified++))
     fi
 done
+if [ $modified == 0 ]; then
+  echo "Info: no file changed. Update pdf/wav OR rm -rf tmp."
+  exit
+fi
 
 
 rm -f tmp/list.txt 
