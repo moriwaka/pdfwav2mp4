@@ -31,13 +31,13 @@ print_usage ()
 }
 
 PDF_FILE=$(realpath "$1")
-OUT_FILE="${PDF_FILE%.pdf}.mp4"
 shift || print_usage
 WAV_DIR=$(realpath "$1")
 shift || print_usage
 shift && print_usage
 
 BASENAME="$(basename "$PDF_FILE")"
+OUT_FILE=$(realpath "./${BASENAME%.pdf}.mp4")
 TMP_DIR=./tmp-${BASENAME%.pdf}
 mkdir -p "$TMP_DIR"
 cd "$TMP_DIR"
