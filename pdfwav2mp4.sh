@@ -35,15 +35,16 @@ WAV_DIR=$1
 shift || print_usage
 shift && print_usage
 
-mkdir -p tmp
+TMP_DIR="${PDF_FILE%.pdf}.tmp"
+mkdir -p "$TMP_DIR"
 
-png=(tmp/*1.png)
-if [ ! -e $png -o "$PDF_FILE" -nt $png ]; then
-  rm -f tmp/*.png
-  pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" tmp/tmp
+firstpng=("$TMP_DIR"/*1.png)
+if [ ! -e "$firstpng" -o "$PDF_FILE" -nt "$firstpng" ]; then
+  rm -f "$TMP_DIR"/*.png
+  pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" "$TMP_DIR"/image
 fi
 
-pngs=(tmp/*png)
+pngs=("$TMP_DIR"/*png)
 wavs=("$WAV_DIR"/*wav)
 
 if [ ${#pngs[@]} != ${#wavs[@]} ]; then
@@ -56,20 +57,20 @@ for i in ${!wavs[@]}; do
     wav=${wavs[$i]} 
     png=${pngs[$i]}
     mp4=${png%.png}.mp4
-    if [ ! -e $mp4 -o "$wav" -nt $mp4 -o $png -nt $mp4 ]; then
-      ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i $png -i "$wav" \
-      -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval -pix_fmt yuv420p -shortest -r $FPS $mp4
+    if [ ! -e "$mp4" -o "$wav" -nt "$mp4" -o "$png" -nt "$mp4" ]; then
+      ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i "$png" -i "$wav" \
+      -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval -pix_fmt yuv420p -shortest -r $FPS "$mp4"
       ((modified++))
     fi
 done
 if [ $modified == 0 ]; then
-  echo "Info: no file changed. Update pdf/wav OR rm -rf tmp."
+  echo "Info: no file is changed. Update pdf/wav OR rm -rf '$TMP_DIR'."
   exit
 fi
 
 
-rm -f tmp/list.txt 
-mp4s=(tmp/*mp4)
-for mp4 in ${mp4s[@]}; do echo "file ${mp4#tmp/}" >> tmp/list.txt; done
-ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i tmp/list.txt -vcodec libx264 "${PDF_FILE%.pdf}.mp4"
+rm -f "$TMP_DIR"/list.txt 
+mp4s=("$TMP_DIR"/*mp4)
+for mp4 in ${mp4s[@]}; do echo "file ${mp4#$TMP_DIR/}" >> "$TMP_DIR"/list.txt; done
+ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i "$TMP_DIR"/list.txt -vcodec libx264 "${PDF_FILE%.pdf}.mp4"
 
