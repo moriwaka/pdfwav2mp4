@@ -18,7 +18,9 @@ DENSITY=600
 GEOMETRYX=1920
 GEOMETRYY=1080
 FPS=30
+MAXBLANKMSEC=500
 
+keyframe_interval=$((FPS * MAXBLANKSEC / 1000))
 ffmpeg_loglevel=warning
 
 print_usage ()
@@ -56,7 +58,7 @@ for i in ${!wavs[@]}; do
     mp4=${png%.png}.mp4
     if [ ! -e $mp4 -o "$wav" -nt $mp4 -o $png -nt $mp4 ]; then
       ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i $png -i "$wav" \
-      -acodec aac -vcodec libx264 -x264opts keyint=1 -pix_fmt yuv420p -shortest -r $FPS $mp4
+      -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval -pix_fmt yuv420p -shortest -r $FPS $mp4
       touch $mp4
     fi
 done
