@@ -38,11 +38,11 @@ if [ ! -e "$firstpng" -o "$PDF_FILE" -nt "$firstpng" ]; then
     pdftocairo -png -scale-to-x $GEOMETRYX -scale-to-y $GEOMETRYY "$PDF_FILE" tmp
 fi
 
-pngs=(*png)
-wavs=("$WAV_DIR"/*wav)
+pngs=(*.png)
+wavs=("$WAV_DIR"/*.wav})
 
 if [ ${#pngs[@]} != ${#wavs[@]} ]; then
-    echo "Error: PDF_FILE pages(${#pngs[@]} isn't same with WAV_DIR *.wav(${#wavs[@]})"
+    echo "Error: PDF_FILE pages(${#pngs[@]} isn't same with WAV_DIR wav files(${#wavs[@]})"
     exit
 fi
 
