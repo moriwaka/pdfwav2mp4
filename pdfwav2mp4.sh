@@ -8,7 +8,7 @@
 GEOMETRYX=1920
 GEOMETRYY=1080
 FPS=30
-MAXBLANKMSEC=500
+MAXBLANKMSEC=100
 
 keyframe_interval=$((FPS * MAXBLANKMSEC / 1000))
 ffmpeg_loglevel=warning
@@ -65,11 +65,13 @@ fi
 
 parallel --colsep '\0' \
          ffmpeg -loglevel $ffmpeg_loglevel -y -loop 1 -i "{1}" -i "{2}" \
-         -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval -pix_fmt yuv420p -shortest -r $FPS "{3}" \
+         -acodec aac -vcodec libx264 -x264opts keyint=$keyframe_interval \
+         -pix_fmt yuv420p -shortest -r $FPS "{3}" \
          :::: "$LIST"
 
-rm -f list.txt 
-mp4s=(*mp4)
-for mp4 in "${mp4s[@]}"; do echo "file ${mp4}" >> list.txt; done
-ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i list.txt -vcodec libx264 "$OUT_FILE"
+LIST=cat_list.txt
+rm -f $LIST 
+mp4s=(*.mp4)
+for mp4 in "${mp4s[@]}"; do echo "file ${mp4}" >> $LIST; done
+ffmpeg -loglevel $ffmpeg_loglevel -y -f concat -i $LIST -vcodec libx264 "$OUT_FILE"
 
