@@ -12,6 +12,5 @@ Dependency:
 
 - ffmpeg
 - poppler-utils
-- GNU parallel
 
 This script was forked from https://github.com/automating-presentations/slide2mp4
